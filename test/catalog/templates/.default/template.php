@@ -2,6 +2,9 @@
 /** @var array $arParams */
 /** @var array $arResult */
 /** @var array $APPLICATION */
+
+use Bitrix\Main\Diag\Debug;
+
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 $this->addExternalCss("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css");
 $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js");
@@ -14,13 +17,13 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
         <select name="select-sort" onchange="document.location=this.options[this.selectedIndex].value">
             <option <?if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method"))?>">Без сортировки</option>
             <option <?if($_REQUEST['sort'] === 'name' && $_REQUEST['method'] === 'asc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=asc", array("sort", "method"));?>">имени по возрастанию</option>
+                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=asc", array("sort", "method"))?>">имени по возрастанию</option>
             <option <?if($_REQUEST['sort'] === 'name' && $_REQUEST['method'] === 'desc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=desc", array("sort", "method"));?>">имени по убыванию</option>
+                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=desc", array("sort", "method"))?>">имени по убыванию</option>
             <option <?if($_REQUEST['sort'] === 'sort' && $_REQUEST['method'] === 'asc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=asc", array("sort", "method"));?>">По индексу по возрастанию</option>
+                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=asc", array("sort", "method"))?>">индексу по возрастанию</option>
             <option <?if($_REQUEST['sort'] === 'sort' && $_REQUEST['method'] === 'desc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=desc", array("sort", "method"));?>">По индексу по возрастанию</option>
+                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=desc", array("sort", "method"))?>">индексу по убыванию</option>
         </select>
     </div>
     <div>
@@ -35,9 +38,9 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
 ?>
 <div class="w-25">
     <img src="<?=$arItem["PREVIEW_PICTURE"]?>" alt="<?=$arItem["NAME"]?>">
-    <a href=""><?=$arItem["NAME"]?></a>
+    <a href="<?=$arItem['DETAIL_PAGE_URL']?>"><?=$arItem["NAME"]?></a>
     <div>
-        <?=$arItem["PREVIEW_TEXT"]?>
+        <p><?=$arItem["PREVIEW_TEXT"]?></p>
     </div>
 </div>
 <?endforeach?>
