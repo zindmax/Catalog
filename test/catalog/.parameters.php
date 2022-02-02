@@ -5,7 +5,7 @@ CModule::IncludeModule("iblock");
 
 $iblockFilter = array('ACTIVE' => 'Y');
 $arIBlock = array();
-$arSort = array("ASC" => "По возростанию", "DESC" => "По убыванию");
+$arSort = array("ASC" => GetMessage("IBLOCK_ASC"), "DESC" => GetMessage("IBLOCK_DESC"));
 $rsIBlock = CIBlock::GetList(array(), $iblockFilter);
 while ($arr = $rsIBlock->Fetch()) {
     $arIBlock[$arr['ID']] = $arr['ID'] . " " . $arr['NAME'];
@@ -28,45 +28,44 @@ foreach($arTemplateInfo as $template) {
 }
 
 $arComponentParameters = array(
+    "GROUPS" => array(
+        "PAGER_SETTINGS" => array(
+            "NAME" => "Настройки постраничной навигации",
+            "800"
+        )
+    ),
     "PARAMETERS" => array(
         "IBLOCK_ID" => array(
             "PARENT" => "DATA_SOURCE",
-            "NAME" => "Инфоблок",
+            "NAME" => GetMessage("IBLOCK_ID_NAME"),
             "TYPE" => "LIST",
             "VALUES" => $arIBlock,
             "REFRESH" => "Y"
         ),
         "ELEMENTS_COUNT" => array(
             "PARENT" => "DATA_SOURCE",
-            "NAME" => "Количество элементов на странице",
+            "NAME" => GetMessage("IBLOCK_LIST_CONT"),
             "TYPE" => "STRING",
             "DEFAULT" => "10"
         ),
         "ELEMENT_FILTER" => array(
             "PARENT" => "DATA_SOURCE",
-            "NAME" => "Свойство для фильтрации",
+            "NAME" => GetMessage("IBLOCK_ELEMENT_FILTER"),
             "TYPE" => "LIST",
             "VALUES" => $arPropList,
         ),
         "PAGER_TEMPLATE" => array(
-            "PARENT" => "BASE",
-            "NAME" => "Шаблон постраничной навигации",
+            "PARENT" => "PAGER_SETTINGS",
+            "NAME" => GetMessage("IBLOCK_PAGENAV_TEMPLATE"),
             "TYPE" => "LIST",
             "VALUES" => $arTemplateList,
             "DEFAULT" => ".default"
         ),
         "CACHE_TIME" => array(
             "PARENT" => "CACHE_SETTINGS",
-            "NAME" => "Время кеширования",
+            "NAME" => GetMessage("I_BLOCK_CACHE_TIME"),
             "TYPE" => "STRING",
             "DEFAULT" => "360000"
         )
     )
 );
-
-//CIBlockParameters::AddPagerSettings(
-//    $arComponentParameters,
-//    'Элементы',  // $pager_title
-//    false,       // $bDescNumbering
-//    true        // $bShowAllParam
-//);

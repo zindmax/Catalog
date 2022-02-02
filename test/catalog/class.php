@@ -1,12 +1,14 @@
 <?
 
-use Bitrix\Main\Diag\Debug;
-use \Bitrix\Main\Loader;
+use Bitrix\Iblock\Component\Tools;
+use Bitrix\Main\Loader;
+use Bitrix\Main\LoaderException;
+
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 class CTestCatalog extends CBitrixComponent {
 
-    public function onPrepareComponentParams($arParams)
+    public function onPrepareComponentParams($arParams): array
     {
         $queryList = $this->request->getQueryList();
         if (isset($queryList["sort"], $queryList["method"]) &&
@@ -33,7 +35,8 @@ class CTestCatalog extends CBitrixComponent {
         $this->getResult();
     }
 
-    private function getResult() {
+    private function getResult(): void
+    {
         $arNavParams = array(
             'nPageSize' => $this->arParams['ELEMENTS_COUNT'],
             'bShowAll' => $this->arParams['PAGER_SHOW_ALL']
@@ -51,8 +54,13 @@ class CTestCatalog extends CBitrixComponent {
             }
             $res = CIBlockElement::getList($arSort, $arFilter, false, $arNavParams, $arSelect);
             while ($element = $res->GetNext()) {
-                $element["PREVIEW_TEXT"] = $this->getPreviewText($element["PREVIEW_TEXT"]);
-                $element["PREVIEW_PICTURE"] = CFile::GetPath($element["PREVIEW_PICTURE"]);
+                Tools::getFieldImageData(
+                    $element,
+                    array("PREVIEW_PICTURE"),
+                    Tools::IPROPERTY_ENTITY_ELEMENT,
+                    'IPROPERTY_VALUES'
+                );
+                $element["PREVIEW_TEXT"] = $this->getPreviewText($element["PREVIEW_TEXT"], $element["PREVIEW_TEXT_TYPE"]);
                 $this->arResult["ITEMS"][] = $element;
             }
 
@@ -66,7 +74,7 @@ class CTestCatalog extends CBitrixComponent {
         }
     }
 
-    private function checkFilterValue()
+    private function checkFilterValue() :bool
     {
         $arIBlockProp = CIBlockProperty::GetList(array(), array("ACTIVE" => "Y", 'IBLOCK_ID' => $this->arParams['IBLOCK_ID']));
         $filter = $this->request->getQuery('filter');
@@ -77,7 +85,7 @@ class CTestCatalog extends CBitrixComponent {
         }return false;
     }
 
-    private function getFilterPropName($arParams)
+    private function getFilterPropName(array $arParams) :string
     {
         $rsProps = CIBlockProperty::GetList(array(),array(
             'ACTIVE' => 'Y',
@@ -92,13 +100,19 @@ class CTestCatalog extends CBitrixComponent {
         }return $result;
     }
 
-    private function getPreviewText(string $text): string
+    private function getPreviewText(string $text, string $type): string
     {
-        $text = trim($text);
-        $text = strip_tags($text);
-        return mb_substr($text, 0,99);
+        if ($type === "html") {
+            $text = HTMLToTxt($text);
+        }
+        if ($type === "text") {
+            $text = str_replace("\xc2\xa0", ' ', html_entity_decode($text));
+            $text = strip_tags($text);
+        }
+        return mb_substr($text, 0,100);
     }
 
+    /** @throws LoaderException */
     private function includeModules(): void
     {
         Loader::includeModule('iblock');
