@@ -53,4 +53,7 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
 <?endforeach?>
 </div>
 <?;endif;?>
-<br /> <?=$arResult["NAV_STRING"]?>
+<br />
+<div class="d-flex justify-content-center">
+    <?=$arResult["NAV_STRING"]?>
+</div>
