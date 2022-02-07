@@ -7,7 +7,6 @@ use Bitrix\Main\LoaderException;
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 class CTestCatalog extends CBitrixComponent {
-
     public function onPrepareComponentParams($arParams): array
     {
         $queryList = $this->request->getQueryList();
@@ -41,6 +40,7 @@ class CTestCatalog extends CBitrixComponent {
             'nPageSize' => $this->arParams['ELEMENTS_COUNT'],
             'bShowAll' => $this->arParams['PAGER_SHOW_ALL']
         );
+
         $arNavigation = CDBResult::GetNavParams($arNavParams);
         if ($this->startResultCache($this->arParams['CACHE_TIME'], $arNavigation)) {
             $arSelect = array('ID', 'PREVIEW_PICTURE', 'NAME', 'PREVIEW_TEXT', 'DETAIL_PAGE_URL');
@@ -54,12 +54,9 @@ class CTestCatalog extends CBitrixComponent {
             }
             $res = CIBlockElement::getList($arSort, $arFilter, false, $arNavParams, $arSelect);
             while ($element = $res->GetNext()) {
-                Tools::getFieldImageData(
-                    $element,
-                    array("PREVIEW_PICTURE"),
-                    Tools::IPROPERTY_ENTITY_ELEMENT,
-                    'IPROPERTY_VALUES'
-                );
+                if ($element["PREVIEW_PICTURE"]["ID"]) {
+                    $element["PREVIEW_PICTURE"] = $this->getPreviewImage($element);
+                }
                 $element["PREVIEW_TEXT"] = $this->getPreviewText($element["PREVIEW_TEXT"], $element["PREVIEW_TEXT_TYPE"]);
                 $this->arResult["ITEMS"][] = $element;
             }
@@ -76,13 +73,35 @@ class CTestCatalog extends CBitrixComponent {
 
     private function checkFilterValue() :bool
     {
-        $arIBlockProp = CIBlockProperty::GetList(array(), array("ACTIVE" => "Y", 'IBLOCK_ID' => $this->arParams['IBLOCK_ID']));
+        $arIBlockProp = CIBlockProperty::GetList(
+            array(),
+            array("ACTIVE" => "Y", 'IBLOCK_ID' => $this->arParams['IBLOCK_ID']));
         $filter = $this->request->getQuery('filter');
         while ($res = $arIBlockProp->Fetch()) {
             if ($res['ID'] === $filter && $this->arParams['ELEMENT_FILTER'] === $filter) {
                 return true;
             }
         }return false;
+    }
+
+    private function getPreviewImage(array $element): array
+    {
+        $prevPic = $element["PREVIEW_PICTURE"];
+        Tools::getFieldImageData(
+            $element,
+            array("PREVIEW_PICTURE"),
+            Tools::IPROPERTY_ENTITY_ELEMENT,
+            'IPROPERTY_VALUES'
+        );
+        $file = CFile::ResizeImageGet(
+            $prevPic["ID"],
+            array("width" => 200, "height" => 200),
+            BX_RESIZE_IMAGE_EXACT,
+            true);
+        $prevPic["SRC"] = $file["src"];
+        $prevPic["WIDTH"] = $file["width"];
+        $prevPic["HEIGHT"] = $file["height"];
+        return $prevPic;
     }
 
     private function getFilterPropName(array $arParams) :string

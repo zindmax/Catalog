@@ -8,8 +8,10 @@ use Bitrix\Main\Diag\Debug;
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 $this->addExternalCss("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css");
 $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js");
+
 ?>
 <?if (!empty($arResult)):?>
+
 <?$APPLICATION->SetTitle("Catalog");?>
 <div class="d-flex flex-wrap flex-row justify-content-between">
     <div class="d-flex flex-row w-50">
@@ -57,3 +59,4 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
 <div class="d-flex justify-content-center">
     <?=$arResult["NAV_STRING"]?>
 </div>
+
