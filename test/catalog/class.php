@@ -8,6 +8,7 @@ use Bitrix\Main\LoaderException;
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 class CTestCatalog extends CBitrixComponent {
+
     public function onPrepareComponentParams($arParams): array
     {
         $queryList = $this->request->getQueryList();
@@ -52,18 +53,20 @@ class CTestCatalog extends CBitrixComponent {
         $arFilter = array(
             'IBLOCK_ID' => $this->arParams['IBLOCK_ID'],
             'ACTIVE' => 'Y',
-            'PROPERTY_' . $this->arParams['FILTER_PROPERTY']['CODE'] . '_VALUE' => $this->checkFilterValue()
+            'PROPERTY_'.$this->arParams['FILTER_PROPERTY']['CODE'].'_VALUE' => $this->checkFilterValue()
         );
         if ($this->startResultCache(false, [$arNavigation, $arFilter])) {
             $arSelect = array('ID', 'PREVIEW_PICTURE', 'NAME', 'PREVIEW_TEXT', 'DETAIL_PAGE_URL');
             $arSort = array($this->arParams["SORT_FIELD"] => $this->arParams["SORT_ORDER"]);
             $res = CIBlockElement::getList($arSort, $arFilter, false, $arNavParams, $arSelect);
-            while ($element = $res->GetNext()) {
-                if ($element["PREVIEW_PICTURE"]["ID"]) {
-                    $element["PREVIEW_PICTURE"] = $this->getPreviewImage($element);
+            while ($element = $res->GetNextElement()) {
+                $arFields = $element->GetFields();
+                if ($arFields["PREVIEW_PICTURE"]["ID"]) {
+                    $arFields["PREVIEW_PICTURE"] = $this->getPreviewImage($arFields);
                 }
-                $element["PREVIEW_TEXT"] = $this->getPreviewText($element["PREVIEW_TEXT"], $element["PREVIEW_TEXT_TYPE"]);
-                $this->arResult["ITEMS"][] = $element;
+                $arFields["PREVIEW_TEXT"] = $this->getPreviewText($arFields["PREVIEW_TEXT"], $arFields["PREVIEW_TEXT_TYPE"]);
+                $arFields["PROP_VALUES"] = $element->GetProperty($this->arParams["FILTER_PROPERTY_ID"])["VALUE"];
+                $this->arResult["ITEMS"][] = $arFields;
             }
             $this->arResult['NAV_STRING'] = $res->GetPageNavString(
                 $this->arParams['PAGER_TITLE'],
@@ -75,7 +78,7 @@ class CTestCatalog extends CBitrixComponent {
         }
     }
 
-    private function checkFilterValue() :string
+    private function checkFilterValue(): string
     {
         $filter = $this->request->getQuery('filter');
         $result = "";
@@ -85,6 +88,19 @@ class CTestCatalog extends CBitrixComponent {
                 break;
             }
         }return $result;
+    }
+
+    private function getFilterPropValues(array $arParams): array
+    {
+        $propValues = [];
+        $arProp = CIBlockProperty::GetPropertyEnum(
+            $arParams['FILTER_PROPERTY_ID'],
+            ["SORT" => "ASC"],
+            ["IBLOCK_ID" => $arParams['IBLOCK_ID']]);
+        while ($prop = $arProp->Fetch()){
+            $propValues[] = $prop;
+        }
+        return $propValues;
     }
 
     private function getPreviewImage(array $element): array
@@ -105,19 +121,6 @@ class CTestCatalog extends CBitrixComponent {
         $prevPic["WIDTH"] = $file["width"];
         $prevPic["HEIGHT"] = $file["height"];
         return $prevPic;
-    }
-
-    private function getFilterPropValues(array $arParams) :array
-    {
-        $propValues = [];
-        $arProp = CIBlockProperty::GetPropertyEnum(
-            $arParams['FILTER_PROPERTY_ID'],
-            ["SORT" => "ASC"],
-            ["IBLOCK_ID" => $arParams['IBLOCK_ID']]);
-        while ($prop = $arProp->Fetch()){
-            $propValues[] = $prop;
-        }
-        return $propValues;
     }
 
     private function getPreviewText(string $text, string $type): string
