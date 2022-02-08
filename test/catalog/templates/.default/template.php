@@ -17,14 +17,14 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
     <div class="d-flex flex-row w-50">
         <span class="align-middle pe-2">Сортировать: </span>
         <select  class="form-select form-select-sm" name="select-sort" onchange="document.location=this.options[this.selectedIndex].value">
-            <option <? if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method"))?>">Без сортировки</option>
+            <option <? if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method", "PAGEN_1"))?>">Без сортировки</option>
             <?foreach ($arParams["SORT_FIELDS"] as $key => $field):?>
                 <option <?if($arParams["SORT_FIELD"] === $key && $arParams["SORT_ORDER"] === 'asc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=asc", array("sort", "method"))?>">
+                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=asc&PAGEN_1=1", array("sort", "method", "PAGEN_1"))?>">
                     <?=$field["title"] . " " . GetMessage("SORT_ORDER_ASC")?>
                 </option>
                 <option <?if($arParams["SORT_FIELD"] === $key && $arParams["SORT_ORDER"] === 'desc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=desc", array("sort", "method"))?>">
+                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=desc&PAGEN_1=1", array("sort", "method", "PAGEN_1"))?>">
                     <?=$field["title"] . " " . GetMessage("SORT_ORDER_DESC")?>
                 </option>
             <?endforeach;?>
@@ -34,7 +34,7 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
         <span>Фильтр: </span>
         <a href="<?=$APPLICATION->GetCurPageParam("", array("filter"))?>">Все</a>
         <?foreach ($arParams['FILTER_VALUES'] as $filter):?>
-            <a href="<?=$APPLICATION->GetCurPageParam("filter={$filter["XML_ID"]}", array("filter"))?>"><?=$filter["VALUE"]?></a>
+            <a href="<?=$APPLICATION->GetCurPageParam("filter={$filter["XML_ID"]}", array("filter", "PAGEN_1"))?>"><?=$filter["VALUE"]?></a>
         <?endforeach;?>
     </div>
 </div>
