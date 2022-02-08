@@ -15,7 +15,7 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
 <?$APPLICATION->SetTitle("Catalog");?>
 <div class="d-flex flex-wrap flex-row justify-content-between">
     <div class="d-flex flex-row w-50">
-        <span class="align-text-middle pe-4">Сортировать: </span>
+        <span class="align-middle pe-2">Сортировать: </span>
         <select  class="form-select form-select-sm" name="select-sort" onchange="document.location=this.options[this.selectedIndex].value">
             <option <? if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method"))?>">Без сортировки</option>
             <?foreach ($arParams["SORT_FIELDS"] as $key => $field):?>
@@ -33,7 +33,9 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
     <div class="d-flex align-items-center justify-content-between w-25">
         <span>Фильтр: </span>
         <a href="<?=$APPLICATION->GetCurPageParam("", array("filter"))?>">Все</a>
-        <a href="<?=$APPLICATION->GetCurPageParam("filter={$arParams['ELEMENT_FILTER']}", array("filter"))?>"><?=$arParams['ELEMENT_FILTER_NAME']?></a>
+        <?foreach ($arParams['FILTER_VALUES'] as $filter):?>
+            <a href="<?=$APPLICATION->GetCurPageParam("filter={$filter["XML_ID"]}", array("filter"))?>"><?=$filter["VALUE"]?></a>
+        <?endforeach;?>
     </div>
 </div>
 <div class="d-flex flex-wrap flex-row" >

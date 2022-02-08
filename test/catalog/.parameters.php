@@ -14,10 +14,10 @@ while ($arr = $rsIBlock->Fetch()) {
 $arPropList = array();
 $rsProps = CIBlockProperty::GetList(array(),array(
     'ACTIVE' => 'Y',
-    "IBLOCK_ID" => ($arCurrentValues["IBLOCK_ID"] ?? $arCurrentValues["ID"])));
+    "IBLOCK_ID" => ($arCurrentValues["IBLOCK_ID"] ?? $arCurrentValues["ID"]),
+    "PROPERTY_TYPE" => "L"));
 
-while ($arProp = $rsProps->Fetch())
-{
+while ($arProp = $rsProps->Fetch()) {
     $arPropList[$arProp['ID']] = $arProp['NAME'];
 }
 
@@ -30,7 +30,7 @@ foreach($arTemplateInfo as $template) {
 $arComponentParameters = array(
     "GROUPS" => array(
         "PAGER_SETTINGS" => array(
-            "NAME" => "Настройки постраничной навигации",
+            "NAME" => GetMessage("I_BLOCK_PAGER_SETTINGS"),
             "800"
         )
     ),
@@ -48,7 +48,7 @@ $arComponentParameters = array(
             "TYPE" => "STRING",
             "DEFAULT" => "10"
         ),
-        "ELEMENT_FILTER" => array(
+        "FILTER_PROPERTY_ID" => array(
             "PARENT" => "DATA_SOURCE",
             "NAME" => GetMessage("IBLOCK_ELEMENT_FILTER"),
             "TYPE" => "LIST",

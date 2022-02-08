@@ -1,0 +1,3 @@
+<?php
+$MESS["SORT_FIELD_NAME_TITLE"] = "Name";
+$MESS["SORT_FIELD_S_INDEX_TITLE"] = "Sort";
