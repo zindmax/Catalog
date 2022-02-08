@@ -25,6 +25,12 @@ class CTestCatalog extends CBitrixComponent {
         $arParams['PAGER_SHOW_ALWAYS'] = true;
         $arParams['PAGER_TEMPLATE'] = trim($arParams['PAGER_TEMPLATE']);
         $arParams['PAGER_SHOW_ALL'] = false;
+        $arParams["SORT_FIELDS"] = [
+            "name" => [
+                "title" => GetMessage("SORT_FIELD_NAME_TITLE")],
+            "sort" => [
+                "title" => GetMessage("SORT_FIELD_S_INDEX_TITLE")
+            ]];
         return $arParams;
     }
 

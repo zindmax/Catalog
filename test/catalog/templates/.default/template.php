@@ -10,22 +10,24 @@ $this->addExternalCss("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/boo
 $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js");
 
 ?>
-<?if (!empty($arResult)):?>
 
+<?if (!empty($arResult)):?>
 <?$APPLICATION->SetTitle("Catalog");?>
 <div class="d-flex flex-wrap flex-row justify-content-between">
     <div class="d-flex flex-row w-50">
-        <span class="align-text-middle pe-4">Сортировать по: </span>
+        <span class="align-text-middle pe-4">Сортировать: </span>
         <select  class="form-select form-select-sm" name="select-sort" onchange="document.location=this.options[this.selectedIndex].value">
-            <option <?if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method"))?>">Без сортировки</option>
-            <option <?if($_REQUEST['sort'] === 'name' && $_REQUEST['method'] === 'asc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=asc", array("sort", "method"))?>">имени по возрастанию</option>
-            <option <?if($_REQUEST['sort'] === 'name' && $_REQUEST['method'] === 'desc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=name&method=desc", array("sort", "method"))?>">имени по убыванию</option>
-            <option <?if($_REQUEST['sort'] === 'sort' && $_REQUEST['method'] === 'asc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=asc", array("sort", "method"))?>">индексу по возрастанию</option>
-            <option <?if($_REQUEST['sort'] === 'sort' && $_REQUEST['method'] === 'desc'):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("sort=sort&method=desc", array("sort", "method"))?>">индексу по убыванию</option>
+            <option <? if(empty($_REQUEST['sort'])):?>selected<?endif;?> value="<?=$APPLICATION->GetCurPageParam("", array("sort", "method"))?>">Без сортировки</option>
+            <?foreach ($arParams["SORT_FIELDS"] as $key => $field):?>
+                <option <?if($arParams["SORT_FIELD"] === $key && $arParams["SORT_ORDER"] === 'asc'):?>selected<?endif;?>
+                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=asc", array("sort", "method"))?>">
+                    <?=$field["title"] . " " . GetMessage("SORT_ORDER_ASC")?>
+                </option>
+                <option <?if($arParams["SORT_FIELD"] === $key && $arParams["SORT_ORDER"] === 'desc'):?>selected<?endif;?>
+                    value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=desc", array("sort", "method"))?>">
+                    <?=$field["title"] . " " . GetMessage("SORT_ORDER_DESC")?>
+                </option>
+            <?endforeach;?>
         </select>
     </div>
     <div class="d-flex align-items-center justify-content-between w-25">
