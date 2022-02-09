@@ -17,7 +17,7 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
         <span class="align-middle pe-2">Сортировать: </span>
         <select  class="form-select form-select-sm" name="select-sort" onchange="document.location=this.options[this.selectedIndex].value">
             <option <? if(empty($_REQUEST['sort'])):?>selected<?endif;?>
-                    value="<?=$APPLICATION->GetCurPageParam("PAGEN_1=1", array("sort", "method", "PAGEN_1"))?>"><?=GetMessage("NO_SORTING")?></option>
+                    value="<?=$APPLICATION->GetCurPageParam("PAGEN_1=1", array("sort", "method", "PAGEN_1"))?>">Без сортировки</option>
             <?foreach ($arParams["SORT_FIELDS"] as $key => $field):?>
                 <option <?if($arParams["SORT_FIELD"] === $key && $arParams["SORT_ORDER"] === 'asc'):?>selected<?endif;?>
                     value="<?=$APPLICATION->GetCurPageParam("sort={$key}&method=asc&PAGEN_1=1", array("sort", "method", "PAGEN_1"))?>">
@@ -55,12 +55,12 @@ $this->addExternalJs("https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/boots
         <div>
             <p class="mb-0 ps-3"><?=$arItem["PREVIEW_TEXT"]?></p>
         </div>
-        <div>
+        <div class="mt-auto">
             <?if($arItem["PROP_VALUES"]):?>
-                <p>
+                <p class="mb-0">
                     <?=$arParams["FILTER_PROPERTY"]["NAME"]?>:
                         <?foreach ($arItem["PROP_VALUES"] as $value):?>
-                                <span><?=$value?></span>
+                                <?=$value?>
                         <?endforeach;?>
                 </p>
             <?endif;?>
