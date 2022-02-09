@@ -1,39 +1,62 @@
 <?
+/** @var array $APPLICATION */
 
 use Bitrix\Iblock\Component\Tools;
-use Bitrix\Main\Diag\Debug;
 use Bitrix\Main\Loader;
 use Bitrix\Main\LoaderException;
-
 if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 
 class CTestCatalog extends CBitrixComponent {
 
     public function onPrepareComponentParams($arParams): array
     {
+        $arParams["SORT_FIELDS"] = [
+            "default" => [
+                "title" => "",
+                "method" => [
+                    "default" => [
+                        "isSelected" => true,
+                    ]
+                ]
+            ],
+            "name" => [
+                "title" => GetMessage("SORT_FIELD_NAME_TITLE"),
+                "method" => [
+                    "asc" => [
+                        "isSelected" => false,
+                    ],
+                    "desc" => [
+                        "isSelected" => false]
+            ]],
+            "sort" => [
+                "title" => GetMessage("SORT_FIELD_S_INDEX_TITLE"),
+                "method" => [
+                    "asc" => [
+                        "isSelected" => false],
+                    "desc" => [
+                        "isSelected" => false]]
+            ]];
+
+        $arParams["SORT_FIELDS"] = $this->createSortMethodValue($arParams["SORT_FIELDS"]);
         $queryList = $this->request->getQueryList();
         if (isset($queryList["sort"], $queryList["method"]) &&
             ($queryList["sort"] === 'name' || $queryList["sort"] === 'sort')) {
             $arParams["SORT_FIELD"] = $queryList["sort"];
             $arParams["SORT_ORDER"] = $queryList["method"];
+            $arParams["SORT_FIELDS"]["default"]["method"]["default"]["isSelected"] = false;
+            $arParams["SORT_FIELDS"][$arParams["SORT_FIELD"]]["method"][$arParams["SORT_ORDER"]]["isSelected"] = true;
         }
         if (!isset($arParams['CACHE_TIME'])) {
             $arParams['CACHE_TIME'] = 360000;
         }
         $arParams['FILTER_PROPERTY'] = CIBlockProperty::GetByID($arParams["FILTER_PROPERTY_ID"])->Fetch();
-        $arParams['FILTER_PROPERTY_VALUES'] = $this->getFilterPropValues($arParams);
+        $arParams['FILTER_PROPERTY_VALUES'] = $this->prepareFilterPropValues($arParams);
         $arParams['CACHE_TIME'] = (int)$arParams['CACHE_TIME'];
         $arParams['ELEMENTS_COUNT'] = (int)$arParams['ELEMENTS_COUNT'];
         $arParams['DISPLAY_BOTTOM_PAGER'] = true;
         $arParams['PAGER_SHOW_ALWAYS'] = true;
         $arParams['PAGER_TEMPLATE'] = trim($arParams['PAGER_TEMPLATE']);
         $arParams['PAGER_SHOW_ALL'] = false;
-        $arParams["SORT_FIELDS"] = [
-            "name" => [
-                "title" => GetMessage("SORT_FIELD_NAME_TITLE")],
-            "sort" => [
-                "title" => GetMessage("SORT_FIELD_S_INDEX_TITLE")
-            ]];
         return $arParams;
     }
 
@@ -43,6 +66,11 @@ class CTestCatalog extends CBitrixComponent {
         $this->getResult();
     }
 
+    /**
+     * @throws \Bitrix\Main\ObjectPropertyException
+     * @throws \Bitrix\Main\SystemException
+     * @throws \Bitrix\Main\ArgumentException
+     */
     private function getResult(): void
     {
         $arNavParams = array(
@@ -62,9 +90,9 @@ class CTestCatalog extends CBitrixComponent {
             while ($element = $res->GetNextElement()) {
                 $arFields = $element->GetFields();
                 if ($arFields["PREVIEW_PICTURE"]["ID"]) {
-                    $arFields["PREVIEW_PICTURE"] = $this->getPreviewImage($arFields);
+                    $arFields["PREVIEW_PICTURE"] = $this->preparePreviewImage($arFields);
                 }
-                $arFields["PREVIEW_TEXT"] = $this->getPreviewText($arFields["PREVIEW_TEXT"], $arFields["PREVIEW_TEXT_TYPE"]);
+                $arFields["PREVIEW_TEXT"] = $this->preparePreviewText($arFields["PREVIEW_TEXT"], $arFields["PREVIEW_TEXT_TYPE"]);
                 $arFields["PROP_VALUES"] = $element->GetProperty($this->arParams["FILTER_PROPERTY_ID"])["VALUE"];
                 $this->arResult["ITEMS"][] = $arFields;
             }
@@ -78,19 +106,34 @@ class CTestCatalog extends CBitrixComponent {
         }
     }
 
-    private function checkFilterValue(): string
+    private function createSortMethodValue(array $sortFields)
     {
-        $filter = $this->request->getQuery('filter');
-        $result = "";
-        foreach ($this->arParams['FILTER_PROPERTY_VALUES'] as $value) {
-            if ($filter === $value["XML_ID"]) {
-                $result = $value["VALUE"];
-                break;
+        foreach ($sortFields as $fieldKey => $field) {
+            foreach ($field["method"] as $methodKey => $method) {
+                if ($fieldKey === "default") {
+                    $sortFields[$fieldKey]["method"][$methodKey]["value"] = "PAGEN_1=1";
+                }else{
+                    $sortFields[$fieldKey]["method"][$methodKey]["value"] = "sort={$fieldKey}&method={$methodKey}&PAGEN_1=1";
+                }
             }
-        }return $result;
+        }
+        return $sortFields;
     }
 
-    private function getFilterPropValues(array $arParams): array
+    private function checkFilterValue(): string
+    {
+        if ($this->request->getQuery('filter') === null) {
+            return "";
+        }
+        $filter = $this->request->getQuery('filter');
+        foreach ($this->arParams['FILTER_PROPERTY_VALUES'] as $value) {
+            if ($filter === $value["XML_ID"]) {
+                return $value["VALUE"];
+            }
+        }return "";
+    }
+
+    private function prepareFilterPropValues(array $arParams): array
     {
         $propValues = [];
         $arProp = CIBlockProperty::GetPropertyEnum(
@@ -100,10 +143,14 @@ class CTestCatalog extends CBitrixComponent {
         while ($prop = $arProp->Fetch()){
             $propValues[] = $prop;
         }
+        foreach ($propValues as $key => $value) {
+            $propValues[$key]["URL"] = "filter={$value["XML_ID"]}";
+        }
+        array_unshift($propValues, ["VALUE" => GetMessage("DEFAULT_FILTER_PROPERTY_VALUE"), "URL" => ""]);
         return $propValues;
     }
 
-    private function getPreviewImage(array $element): array
+    private function preparePreviewImage(array $element): array
     {
         Tools::getFieldImageData(
             $element,
@@ -123,7 +170,7 @@ class CTestCatalog extends CBitrixComponent {
         return $prevPic;
     }
 
-    private function getPreviewText(string $text, string $type): string
+    private function preparePreviewText(string $text, string $type): string
     {
         if ($type === "html") {
             $text = HTMLToTxt($text);
