@@ -5,7 +5,7 @@ $arComponentDescription = array(
     "NAME" => GetMessage("COMP_NAME"),
     "DESCRIPTION" => GetMessage("COMP_DESC"),
     "PATH" => array(
-        "ID" => "test",
+        "ID" => "adict",
         "NAME" => GetMessage("COMP_PARENT_NAME")
     )
 );
